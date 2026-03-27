@@ -60,7 +60,7 @@ Before using the kNN algorithm, we need to solve two problems first:
 
 First, we need to define the distance between two points in the 3072-dimensional space. If $I_i$ represents the data point of the $i$-th image, and $I_{i,p}$ represents the distance of this data point in the $p$-th dimension, expanding the definition of Euclidean distance in 2D space, we get:
 
-$$d(I_1, I_2) = \sqrt{\sum_{p=1}^{3072}(I_{1, p}-I_{2,p})^2}.$$
+$$d(I_1, I_2) = \sqrt{\sum_{p=1}^{3072}(I_{1, p}-I_{2,p})^2}$$
 
 Second, considering that taking the mode of the $k$ nearest neighbors might result in a tie, we need a rule to break it. When a tie occurs, we can select the label of the closest point among the labels with the highest number of votes.
 
@@ -110,7 +110,7 @@ Earlier we roughly described how to evaluate the superiority or inferiority of a
 
 Assume our dataset has a total of $N$ data points, shaped like $\{(x_i, y_i)\}_{i=1}^N$. We define the loss function of each data point with respect to $W$ as $L_i(f(x_i; W), y_i)$, and the loss function of the entire dataset with respect to $W$ is the average of the loss functions of each data point, namely:
 
-$$L=\frac{1}{N}\sum_{i=1}^NL_i(f(x_i; W), y_i).$$
+$$L=\frac{1}{N}\sum_{i=1}^NL_i(f(x_i; W), y_i)$$
 
 For a certain image vector $x_i$, let $s_i=f(x_i,W)$ be its score vector. We take the label with the highest score as the prediction for this image. Since a higher score indicates a greater likelihood that the image belongs to that label, we might as well process $s_i$ into a set of conditional probabilities $p_i$. Let the number of labels be $M$; we need $p_i$ to satisfy two properties:
 
@@ -122,13 +122,13 @@ We can quickly think of a solution: directly set the dimension in $p_i$ with the
 
 #### 2.1.1 Softmax Function & Cross-Entropy Loss
 
-$$p_{i,j} = \frac{\exp(s_{i,j})}{\sum_{k=1}^{M} \exp(s_{i,k})}.$$
+$$p_{i,j} = \frac{\exp(s_{i,j})}{\sum_{k=1}^{M} \exp(s_{i,k})}$$
 
 Doing this is equivalent to using a differentiable function to imitate the operation of directly taking the maximum value and setting it to 1, hence we call it the Softmax function.
 
 Let's further consider how to calculate $L_i$ using $p_i$. In the best-case scenario, a $W$ can perfectly fit all the data in the dataset; let $L_i=0$ at this time. As the fitting ability of $W$ worsens, $L_i$ should also become larger.
 
-$$L_i(f(x_i, W), y_i)=-\log p_{i, y_i}.$$
+$$L_i(f(x_i, W), y_i)=-\log p_{i, y_i}$$
 
 This is the loss function that fits the above characteristics.
 
@@ -144,9 +144,9 @@ To review, hyperparameters refer to parameters that have already been artificial
 
 In the example of the above figure, the more non-zero terms in the polynomial, the more complex the polynomial curve becomes. Similarly, we empirically hope that this model is simpler; that is, we hope our model can use fewer features, meaning we want more terms in the matrix to be smaller and closer to 0. We can communicate this preference of ours to the computer through a previously mentioned hyperparameter—a parameter determined before training. We can add a regularization term after the existing loss function:
 
-$$L=\frac{1}{N}\sum_{i=1}^NL_i+\lambda\cdot R(W),$$
+$$L=\frac{1}{N}\sum_{i=1}^NL_i+\lambda\cdot R(W)$$
 
-$$R(W)=\sum_j\sum_k(W_{j,k})^2.$$
+$$R(W)=\sum_j\sum_k(W_{j,k})^2$$
 
 Here, $\lambda$ is a real number used to adjust the magnitude of the impact the regularization term has on the loss function. The size of $\lambda$ and the definition method of $R(W)$ can both be counted as hyperparameters, and we similarly need to avoid data contamination when determining them.
 
@@ -232,4 +232,4 @@ Johnson, Justin. UMich EECS-498.
 
 MIT 6.S191.
 
-Tendo, L. SSTIA Deep Learning Workshop 2026. Source: <https://github.com/UMJI-SSTIA/Deeplearning-wksp-2025/blob/main/Worksheet/Part1.html>
+Tendo, L. SSTIA Deep Learning Workshop 2025. Source: <https://github.com/UMJI-SSTIA/Deeplearning-wksp-2025/blob/main/Worksheet/Part1.html>
