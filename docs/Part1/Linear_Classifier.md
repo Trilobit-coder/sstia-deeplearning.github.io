@@ -115,7 +115,9 @@ $$L=\frac{1}{N}\sum_{i=1}^NL_i(f(x_i; W), y_i)$$
 For a certain image vector $x_i$, let $s_i=f(x_i,W)$ be its score vector. We take the label with the highest score as the prediction for this image. Since a higher score indicates a greater likelihood that the image belongs to that label, we might as well process $s_i$ into a set of conditional probabilities $p_i$. Let the number of labels be $M$; we need $p_i$ to satisfy two properties:
 
 1. The sum of the components across all dimensions of $p_i$ must be 1, i.e.,
+
     $$\sum_{j=1}^Mp_{i,j}=1;$$
+
 2. The probability corresponding to the correct label in $p_i$ needs to be significantly larger than the probabilities of other incorrect labels.
 
 We can quickly think of a solution: directly set the dimension in $p_i$ with the largest $s_i$ to 1, and the other dimensions to 0. However, after doing this, we'll find that for the same image $x$, $p_i$ is not differentiable when using $W$ as the independent variable. Differentiability is crucial for us to find the most accurate $W$, so we need to slightly alter our strategy:
