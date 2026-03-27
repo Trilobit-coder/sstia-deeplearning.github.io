@@ -35,7 +35,9 @@ jobs:
       
       - name: Install dependencies
         working-directory: ./web
-        run: |
+        run: |    
+          uv venv
+          source .venv/bin/activate
           uv pip install mkdocs mkdocs-material mkdocs-minify-plugin
       
       - name: Build site
