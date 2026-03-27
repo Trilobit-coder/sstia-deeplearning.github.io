@@ -5,9 +5,9 @@ on:
     branches:
       - main
     paths:
-      - 'web/**'  # Only run if files in the web folder change
+      - 'web/**'
 
-# Future-proofs the runner for the June 2026 Node.js transition
+# Resolves the Node.js 24 deprecation warning for June 2026
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -16,7 +16,6 @@ permissions:
   pages: write
   id-token: write
 
-# Prevents multiple deployments from running at the same time
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -32,11 +31,13 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          # Changed to mkdocs.yml so the cache has a file to "watch"
+          cache-dependency-glob: "web/mkdocs.yml" 
           python-version: '3.11'
 
       - name: Build site with uv
         working-directory: ./web
-        # 'uv run' creates a temporary environment to avoid "externally managed" errors
+        # '--with' handles the plugins without needing a requirements.txt or --system flag
         run: |
           uv run --with mkdocs-material --with mkdocs-minify-plugin \
           mkdocs build --site-dir ../site
@@ -44,7 +45,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Points to the 'site' folder created in the step above
           path: ./site
 
   deploy:
