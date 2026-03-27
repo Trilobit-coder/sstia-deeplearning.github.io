@@ -7,6 +7,10 @@ on:
     paths:
       - 'web/**'
 
+# Solves the Node.js 20 deprecation warning for 2026
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: read
   pages: write
@@ -27,24 +31,25 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          # Tells uv where to look for your lockfile or requirements
+          cache-dependency-glob: "web/requirements.txt" 
           python-version: '3.11'
 
       - name: Install dependencies
-        # Running inside ./web where your mkdocs.yml and requirements might live
         working-directory: ./web
+        # Installing to the system path of the runner is often more stable for simple CI tasks
         run: |
-          uv pip install mkdocs mkdocs-material mkdocs-minify-plugin
+          uv pip install --system mkdocs mkdocs-material mkdocs-minify-plugin
 
       - name: Build site
         working-directory: ./web
-        # This builds using the mkdocs.yml in ./web and outputs to ./web/site
-        run: uv run mkdocs build
+        # Run mkdocs directly since we installed it to the runner's system path
+        run: mkdocs build --site-dir ../site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Point to the site folder inside the web directory
-          path: ./web/site
+          path: ./site
 
   deploy:
     environment:
