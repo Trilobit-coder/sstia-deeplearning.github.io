@@ -236,6 +236,8 @@ Up to this point, we have built the basic unit of deep learning from scratch—t
 
 Have you noticed that it looks very much like a biological neuron?
 
+![type:video](../media/video/1080p60/FNNMath.mp4)
+
 -----
 
 ## References

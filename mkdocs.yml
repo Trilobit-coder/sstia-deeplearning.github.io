@@ -2,6 +2,8 @@ site_name: "Deep Learning Workshop 2026"
 site_description: "The tutorial about deep learning for beginners"
 site_author: "sstia-trilobit"
 site_url: "https://trilobit-coder.github.io/deeplearning/"
+repo_url: "https://github.com/trilobit-coder/deeplearning/"
+repo_name: deeplearning
 
 theme:
   name: material
@@ -21,14 +23,17 @@ theme:
       primary: indigo
       accent: indigo
       toggle:
-        icon: material/brightness-7
+        icon: material/weather-sunny
         name: Switch to dark mode
+      media: "(prefers-color-scheme: light)" 
+
     - scheme: slate
       primary: indigo
-      accent: indigo
+      accent: light blue
       toggle:
-        icon: material/brightness-4
+        icon: material/weather-night
         name: Switch to light mode
+      media: "(prefers-color-scheme: dark)"
 
 extra_css:
   - stylesheets/extra.css
@@ -66,3 +71,4 @@ nav:
   - Home: index.md
   - Part1:
       - "KNN and Linear Classifier": Part1/Linear_Classifier.md
+      - "CNN": Part1/CNN.md

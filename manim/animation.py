@@ -804,3 +804,242 @@ class ActivationFunctions(Scene):
         self.play(FadeIn(dot_relu, scale=0.5))
         self.play(vt_relu.animate.set_value(5), run_time=3, rate_func=linear)
         self.wait(3)
+
+
+class FNNMath(Scene):
+    def construct(self):
+        # --- 1. Title ---
+        title = Tex("Mathematics of a Feedforward Neural Network").scale(0.9)
+        title.to_edge(UP)
+        self.play(Write(title))
+
+        # --- 2. Draw a simple 2-2 Network architecture ---
+        # Input nodes
+        input_layer = VGroup(
+            Circle(radius=0.4, color=BLUE, fill_opacity=0.2).move_to(
+                LEFT * 4 + UP * 1.5
+            ),
+            Circle(radius=0.4, color=BLUE, fill_opacity=0.2).move_to(
+                LEFT * 4 + DOWN * 1.5
+            ),
+        )
+        x1_label = MathTex("x_1").move_to(input_layer[0].get_center())
+        x2_label = MathTex("x_2").move_to(input_layer[1].get_center())
+
+        # Hidden nodes
+        hidden_layer = VGroup(
+            Circle(radius=0.4, color=GREEN, fill_opacity=0.2).move_to(
+                LEFT * 1 + UP * 1.5
+            ),
+            Circle(radius=0.4, color=GREEN, fill_opacity=0.2).move_to(
+                LEFT * 1 + DOWN * 1.5
+            ),
+        )
+        h1_label = MathTex("a_1").move_to(hidden_layer[0].get_center())
+        h2_label = MathTex("a_2").move_to(hidden_layer[1].get_center())
+
+        # Weights (Lines connecting them)
+        weights = VGroup()
+        for i_node in input_layer:
+            for h_node in hidden_layer:
+                line = Line(
+                    i_node.get_right(), h_node.get_left(), stroke_width=2, color=GRAY
+                )
+                weights.add(line)
+
+        network = VGroup(
+            input_layer, hidden_layer, weights, x1_label, x2_label, h1_label, h2_label
+        )
+
+        self.play(FadeIn(input_layer), Write(x1_label), Write(x2_label))
+        self.play(Create(weights))
+        self.play(FadeIn(hidden_layer), Write(h1_label), Write(h2_label))
+        self.wait(1)
+
+        # Move network to the left to make room for math
+        self.play(network.animate.scale(0.7).shift(LEFT * 2))
+
+        # --- 3. The Math Setup ---
+        # Step 1: Linear Transformation Formula
+        math_title = (
+            Tex("1. Linear Transformation").scale(0.7).move_to(RIGHT * 2 + UP * 2)
+        )
+        eq_linear = (
+            MathTex("Z", "=", "W", "\\cdot", "X", "+", "b")
+            .scale(0.9)
+            .next_to(math_title, DOWN)
+        )
+
+        # Color coding to match the diagram
+        eq_linear.set_color_by_tex("X", BLUE)
+        eq_linear.set_color_by_tex("Z", GREEN)
+
+        self.play(Write(math_title))
+        self.play(Write(eq_linear))
+        self.wait(1)
+
+        # Expand the matrices
+        expanded_matrix = (
+            MathTex(
+                "\\begin{bmatrix} z_1 \\\\ z_2 \\end{bmatrix}",
+                "=",
+                "\\begin{bmatrix} w_{11} & w_{12} \\\\ w_{21} & w_{22} \\end{bmatrix}",
+                "\\begin{bmatrix} x_1 \\\\ x_2 \\end{bmatrix}",
+                "+",
+                "\\begin{bmatrix} b_1 \\\\ b_2 \\end{bmatrix}",
+            )
+            .scale(0.65)
+            .next_to(eq_linear, DOWN)
+        )
+
+        expanded_matrix[0].set_color(GREEN)  # Z
+        expanded_matrix[3].set_color(BLUE)  # X
+
+        self.play(TransformFromCopy(eq_linear, expanded_matrix))
+        self.wait(2)
+
+        # Highlight connections
+        # w11 connects x1 to z1 (top to top)
+        highlight_line1 = Line(
+            input_layer[0].get_right(),
+            hidden_layer[0].get_left(),
+            stroke_width=5,
+            color=YELLOW,
+        )
+        self.play(Create(highlight_line1))
+        self.play(
+            Indicate(expanded_matrix[2][0:3], color=YELLOW)
+        )  # Roughly indicating w11
+        self.play(FadeOut(highlight_line1))
+
+        # --- 4. The Activation Function ---
+        step2_title = (
+            Tex("2. Non-linear Activation")
+            .scale(0.7)
+            .next_to(expanded_matrix, DOWN)
+            .shift(DOWN * 0.5)
+        )
+        eq_act = (
+            MathTex("A", "=", "\\sigma(", "Z", ")")
+            .scale(0.9)
+            .next_to(step2_title, DOWN)
+        )
+
+        eq_act.set_color_by_tex("A", GREEN)
+        eq_act.set_color_by_tex("Z", GREEN)
+
+        self.play(Write(step2_title))
+        self.play(Write(eq_act))
+        self.wait(1)
+
+        expanded_act = (
+            MathTex(
+                "\\begin{bmatrix} a_1 \\\\ a_2 \\end{bmatrix}",
+                "=",
+                "\\begin{bmatrix} \\sigma(z_1) \\\\ \\sigma(z_2) \\end{bmatrix}",
+            )
+            .scale(0.7)
+            .next_to(eq_act, DOWN)
+        )
+        expanded_act.set_color(GREEN)
+
+        self.play(TransformFromCopy(eq_act, expanded_act))
+        self.wait(2)
+
+        self.play(FadeOut(*self.mobjects))
+        # --- 1. CONFIGURATION & TITLE ---
+        title = Tex("Forward Propagation in Deep FNN").scale(0.8).to_edge(UP, buff=0.5)
+        self.play(Write(title))
+
+        # Define Colors
+        C_IN, C_H1, C_H2, C_OUT = BLUE, GREEN, YELLOW, RED
+
+        # --- 2. ARCHITECTURE CONSTRUCTION ---
+        # We create the layers first to calculate the layout
+        layers = VGroup()
+        layer_sizes = [2, 2, 2, 1]
+        layer_colors = [C_IN, C_H1, C_H2, C_OUT]
+        labels = ["x", "a^{(1)}", "a^{(2)}", "\\hat{y}"]
+
+        network_nodes = VGroup()
+        node_labels = VGroup()
+
+        for i, size in enumerate(layer_sizes):
+            layer = VGroup(
+                *[
+                    Circle(radius=0.25, color=layer_colors[i], fill_opacity=0.3)
+                    for _ in range(size)
+                ]
+            ).arrange(DOWN, buff=0.6)
+
+            # Position layers with consistent spacing
+            layer.move_to(LEFT * 5 + RIGHT * i * 1.8)
+            network_nodes.add(layer)
+
+            # Add internal labels
+            for j, node in enumerate(layer):
+                lbl_text = f"{labels[i]}_{j+1}" if size > 1 else f"{labels[i]}"
+                lbl = MathTex(lbl_text).scale(0.5).move_to(node.get_center())
+                node_labels.add(lbl)
+
+        # Connections (Weights)
+        all_weights = VGroup()
+        for i in range(len(network_nodes) - 1):
+            conn_group = VGroup()
+            for n1 in network_nodes[i]:
+                for n2 in network_nodes[i + 1]:
+                    line = Line(
+                        n1.get_right(),
+                        n2.get_left(),
+                        stroke_width=1,
+                        color=GRAY,
+                        stroke_opacity=0.5,
+                    )
+                    conn_group.add(line)
+            all_weights.add(conn_group)
+
+        # Display Network (Initially centered, then shifted)
+        network_display = VGroup(network_nodes, node_labels, all_weights)
+        self.play(FadeIn(network_nodes[0], node_labels[0:2]))  # Show Input
+        self.wait(0.5)
+
+        # --- 3. ANIMATING THE FORWARD PASS & MATH ---
+        math_steps = VGroup().scale(0.8).to_edge(RIGHT, buff=1.0)
+
+        # Step 1: Input to Hidden 1
+        self.play(Create(all_weights[0]), FadeIn(network_nodes[1], node_labels[2:4]))
+        l1_math = MathTex(
+            "A^{(1)}", "=", "\\sigma(", "W^{(1)}", "X", "+", "b^{(1)}", ")"
+        ).scale(0.7)
+        l1_math.set_color_by_tex("A^{(1)}", C_H1).set_color_by_tex("X", C_IN)
+        l1_math.move_to(RIGHT * 3.5 + UP * 1.5)
+        self.play(Write(l1_math))
+
+        # Step 2: Hidden 1 to Hidden 2
+        self.play(Create(all_weights[1]), FadeIn(network_nodes[2], node_labels[4:6]))
+        l2_math = (
+            MathTex(
+                "A^{(2)}", "=", "\\sigma(", "W^{(2)}", "A^{(1)}", "+", "b^{(2)}", ")"
+            )
+            .scale(0.7)
+            .next_to(l1_math, DOWN, buff=0.8, aligned_edge=LEFT)
+        )
+        l2_math.set_color_by_tex("A^{(2)}", C_H2).set_color_by_tex("A^{(1)}", C_H1)
+        self.play(Write(l2_math))
+
+        # Step 3: Hidden 2 to Output
+        self.play(Create(all_weights[2]), FadeIn(network_nodes[3], node_labels[6]))
+        out_math = (
+            MathTex(
+                "\\hat{y}", "=", "softmax(", "W^{(3)}", "A^{(2)}", "+", "b^{(3)}", ")"
+            )
+            .scale(0.7)
+            .next_to(l2_math, DOWN, buff=0.8, aligned_edge=LEFT)
+        )
+        out_math.set_color_by_tex("\\hat{y}", C_OUT).set_color_by_tex("A^{(2)}", C_H2)
+        self.play(Write(out_math))
+
+        # --- 4. FINAL POLISH ---
+        # Highlight the flow
+        self.play(Indicate(l1_math), Indicate(l2_math), Indicate(out_math))
+        self.wait(2)

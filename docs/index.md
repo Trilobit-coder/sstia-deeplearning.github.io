@@ -28,5 +28,5 @@ Have fun!
 ---
 
 <div style="color: grey; font-size: 0.8em; text-align: center; margin-top: 50px;">
-  <small>© 2026 SSTIA-DeepLearning Workshop. All rights reserved. No part of this tutorial—including code, text, and animations—may be reproduced or redistributed without prior written permission.</small>
+  <small>© 2026 SSTIA. All rights reserved. No part of this tutorial(including code, text, and animations) may be reproduced or redistributed without prior written permission.</small>
 </div>
