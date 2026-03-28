@@ -215,3 +215,329 @@ class WhiskerMaxPooling(Scene):
         self.play(Write(summary))
 
         self.wait(3)
+
+
+class CNNArchitecture(Scene):
+    def construct(self):
+        # Configuration for data blocks
+        data_config = {
+            "stroke_color": WHITE,
+            "stroke_width": 1,
+            "fill_opacity": 0.6,
+        }
+
+        # --- STEP 1: Input Image ---
+        self.next_section("Step 1: Input")
+        title = Text("CNN Architecture: The Grand Tour", font_size=36).to_edge(UP)
+        self.play(Write(title))
+
+        input_box = Rectangle(width=3, height=3, color=BLUE, **data_config)
+        input_box.set_fill(BLUE_E)
+        # Add grid lines to represent pixel structure
+        grid = NumberPlane(
+            x_range=[0, 8, 1],
+            y_range=[0, 8, 1],
+            background_line_style={
+                "stroke_color": BLUE_D,
+                "stroke_width": 0.5,
+                "stroke_opacity": 1,
+            },
+        ).replace(input_box)
+        input_grp = VGroup(input_box, grid).shift(LEFT * 5)
+
+        # Explicit labels defined in prompt
+        input_label = MathTex(r"32 \times 32 \times 3", font_size=24).next_to(
+            input_grp, DOWN
+        )
+        feat_low_label = Text(
+            "Low-Level Features\n(Edges, fur patches)", font_size=20, color=BLUE_C
+        ).next_to(input_grp, UP)
+
+        self.play(FadeIn(input_grp), Write(input_label))
+        self.play(Write(feat_low_label))
+        self.wait(1)
+
+        # --- STEP 2: Convolutional Layers & High-Level Features ---
+        self.next_section("Step 2: Features")
+
+        # Define a VGroup for feature maps
+        feature_maps = VGroup()
+        map_colors = [TEAL_E, GREEN_E, YELLOW_E]
+        shapes = [(2.5, 16), (2.0, 32), (1.5, 64)]  # (size, depth)
+
+        for i, (size, depth) in enumerate(shapes):
+            map_stack = VGroup()
+            for j in range(3):  # visual stack depth
+                rect = Rectangle(
+                    width=size, height=size, color=map_colors[i], **data_config
+                )
+                rect.shift(RIGHT * (j * 0.1) + UP * (j * 0.1))
+                map_stack.add(rect)
+            map_stack.move_to(LEFT * 2.5 + RIGHT * (i * 2))
+            feature_maps.add(map_stack)
+
+        feat_high_label = Text(
+            "High-Level Features",
+            font_size=20,
+            color=YELLOW_C,
+        ).next_to(feature_maps, UP)
+
+        # Simple arrows showing data flow
+        arrow1 = Arrow(input_grp.get_right(), feature_maps[0].get_left(), buff=0.2)
+        arrow2 = Arrow(
+            feature_maps[0].get_right(), feature_maps[1].get_left(), buff=0.2
+        )
+        arrow3 = Arrow(
+            feature_maps[1].get_right(), feature_maps[2].get_left(), buff=0.2
+        )
+        flow_arrows = VGroup(arrow1, arrow2, arrow3)
+
+        self.play(
+            FadeOut(feat_low_label),
+            Write(feat_high_label),
+            Create(flow_arrows),
+            FadeIn(feature_maps, shift=RIGHT),
+        )
+        self.wait(2)
+
+        # --- STEP 3: The Flattening (Transition) ---
+        self.next_section("Step 3: Flattening")
+
+        # Create the small, deep volume explicitly requested (e.g., 4x4x64)
+        deep_vol_box = Rectangle(width=1.0, height=1.0, color=PURPLE, **data_config)
+        deep_vol_box.set_fill(PURPLE_E)
+
+        # Visualizing depth by stacking many layers slightly offset
+        deep_vol_stack = VGroup()
+        for i in range(8):
+            d = Rectangle(width=1.0, height=1.0, color=PURPLE, **data_config)
+            d.set_fill(PURPLE_E)
+            d.shift(RIGHT * (i * 0.05) + UP * (i * 0.05))
+            deep_vol_stack.add(d)
+
+        deep_vol_grp = deep_vol_stack.move_to(feature_maps[2].get_center())
+        vol_label = MathTex(r"4 \times 4 \times 64", font_size=22).next_to(
+            deep_vol_grp, DOWN
+        )
+
+        # The Flattened Vector (concept vector)
+        vector_dots = VGroup(
+            *[Circle(radius=0.08, color=WHITE, fill_opacity=1) for _ in range(12)]
+        )
+        vector_dots.arrange(DOWN, buff=0.15).shift(RIGHT * 4.5)
+        vec_label = MathTex(r"1024 \text{ Vector}", font_size=22).next_to(
+            vector_dots, DOWN
+        )
+        vec_concept_label = Text(
+            "Concepts:\n[fur, 4 legs, ears...]", font_size=18, color=GREY_C
+        ).next_to(vector_dots, UP)
+
+        self.play(
+            FadeOut(feat_high_label),
+            FadeOut(flow_arrows),
+            FadeOut(feature_maps[:2]),  # Keep the last feature map to transform it
+            ReplacementTransform(feature_maps[2], deep_vol_grp),
+            Write(vol_label),
+        )
+        self.wait(1)
+
+        self.play(
+            ReplacementTransform(deep_vol_grp, vector_dots),
+            Transform(vol_label, vec_label),
+            Write(vec_concept_label),
+        )
+        self.wait(2)
+
+        # --- STEP 4: FC Layer and The Classifier ---
+        self.next_section("Step 4: Classifier")
+
+        output_labels = (
+            VGroup(
+                Text("98% Cat", color=GREEN, font_size=26),
+                Text("2% Dog", color=RED, font_size=26),
+            )
+            .arrange(DOWN, buff=0.4)
+            .shift(RIGHT * 5.5)
+        )
+
+        # Draw dense connections (FC)
+        fc_connections = VGroup()
+        for dot in vector_dots:
+            fc_connections.add(
+                Line(
+                    dot.get_right(),
+                    output_labels[0].get_left(),
+                    stroke_width=0.5,
+                    stroke_opacity=0.2,
+                    color=GRAY,
+                )
+            )
+            fc_connections.add(
+                Line(
+                    dot.get_right(),
+                    output_labels[1].get_left(),
+                    stroke_width=0.5,
+                    stroke_opacity=0.2,
+                    color=GRAY,
+                )
+            )
+
+        self.play(
+            FadeOut(vec_concept_label),
+            FadeOut(vec_label),
+            FadeOut(vol_label),
+            Create(fc_connections),
+            Write(output_labels),
+        )
+        self.wait(2)
+
+        # --- STEP 5: Final Full Architecture View ---
+        self.next_section("Final Architecture")
+
+        # We need to shrink everything and arrange it horizontally for the final view
+        final_group = VGroup(
+            input_grp,
+            input_label,
+            feature_maps[0],
+            feature_maps[1],
+            feature_maps[2],
+            vector_dots,
+            vol_label,  # vol_label was transformed to vec_label
+            fc_connections,
+            output_labels,
+        )
+
+        final_title = Text(
+            "Full CNN Architecture: Image to Concept", font_size=32
+        ).to_edge(UP)
+
+        self.play(
+            FadeOut(title),
+            FadeOut(vector_dots),  # To replace with a cleaner final representation
+            FadeOut(fc_connections),
+            FadeOut(input_grp),
+            FadeOut(input_label),
+            FadeOut(output_labels),
+            FadeOut(output_labels),
+        )
+        self.wait(0.5)
+
+        # Re-creating static simplified components for the full view
+        s = 0.6  # Scale factor
+        f_input = input_grp.copy().scale(s).move_to(LEFT * 5.5)
+        f_input_l = MathTex(r"32{\times}32{\times}3", font_size=18).next_to(
+            f_input, DOWN, buff=0.1
+        )
+
+        # Re-create feature stacks at final positions
+        f_maps = VGroup()
+        x_pos = [-3.5, -1.8, -0.2]
+        for i, (size, depth) in enumerate(shapes):
+            map_stack = VGroup()
+            for j in range(3):
+                rect = Rectangle(
+                    width=size * s, height=size * s, color=map_colors[i], **data_config
+                )
+                rect.shift(RIGHT * (j * 0.05) + UP * (j * 0.05))
+                map_stack.add(rect)
+            map_stack.move_to(RIGHT * x_pos[i])
+            f_maps.add(map_stack)
+
+        # Labels for feature maps
+        f_map_ls = VGroup(
+            MathTex(r"28{\times}28{\times}16", font_size=16).next_to(
+                f_maps[0], DOWN, buff=0.1
+            ),
+            MathTex(r"14{\times}14{\times}32", font_size=16).next_to(
+                f_maps[1], DOWN, buff=0.1
+            ),
+            MathTex(r"4{\times}4{\times}64", font_size=16).next_to(
+                f_maps[2], DOWN, buff=0.1
+            ),
+        )
+
+        f_vector = VGroup(
+            *[Circle(radius=0.04, color=WHITE, fill_opacity=1) for _ in range(20)]
+        )
+        f_vector.arrange(DOWN, buff=0.08).shift(RIGHT * 2.0)
+        f_vec_l = MathTex(r"1024", font_size=18).next_to(f_vector, DOWN, buff=0.1)
+
+        f_output = (
+            VGroup(
+                Text("Cat", color=GREEN, font_size=20),
+                Text("Dog", color=RED, font_size=20),
+            )
+            .arrange(DOWN, buff=0.5)
+            .shift(RIGHT * 4.5)
+        )
+        f_output_l = Text("Output", font_size=18, color=GREY).next_to(
+            f_output, DOWN, buff=0.2
+        )
+
+        # Connecting Arrows (Static)
+        arrows = VGroup(
+            Arrow(
+                f_input.get_right(),
+                f_maps[0].get_left(),
+                buff=0.1,
+                stroke_width=2,
+                max_tip_length_to_length_ratio=0.15,
+            ),
+            Arrow(
+                f_maps[0].get_right(),
+                f_maps[1].get_left(),
+                buff=0.1,
+                stroke_width=2,
+                max_tip_length_to_length_ratio=0.15,
+            ),
+            Arrow(
+                f_maps[1].get_right(),
+                f_maps[2].get_left(),
+                buff=0.1,
+                stroke_width=2,
+                max_tip_length_to_length_ratio=0.15,
+            ),
+            Arrow(
+                f_maps[2].get_right(),
+                f_vector.get_left(),
+                buff=0.1,
+                stroke_width=2,
+                max_tip_length_to_length_ratio=0.15,
+            ),
+            Arrow(
+                f_vector.get_right(),
+                f_output.get_left(),
+                buff=0.1,
+                stroke_width=2,
+                max_tip_length_to_length_ratio=0.15,
+            ),
+        )
+
+        # Section Labels
+        section_labels = VGroup(
+            Text("INPUT", font_size=14, color=BLUE_B).next_to(f_input, UP, buff=0.4),
+            Text("FEATURE EXTRACTION (CONV+POOL)", font_size=14, color=TEAL_B).next_to(
+                f_maps[1], UP, buff=0.4
+            ),
+            Text("FLATTEN", font_size=14, color=PURPLE_B).next_to(
+                f_vec_l, UP, buff=3.6
+            ),
+            Text("CLASSIFIER", font_size=14, color=YELLOW_B).next_to(
+                f_output, UP, buff=0.4
+            ),
+        )
+
+        self.play(
+            FadeIn(final_title),
+            FadeIn(f_input),
+            FadeIn(f_input_l),
+            FadeIn(f_maps),
+            FadeIn(f_map_ls),
+            FadeIn(f_vector),
+            FadeIn(f_vec_l),
+            FadeIn(f_output),
+            FadeIn(f_output_l),
+            Create(arrows),
+            Write(section_labels),
+        )
+        self.wait(5)
