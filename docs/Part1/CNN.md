@@ -211,6 +211,6 @@ model.eval()
 
 ## References
 
-SSTIA. "SSTIA Deep Learning Workshop 2025." Source: <https://github.com/UMJI-SSTIA/Deeplearning-wksp-2025/blob/main/Worksheet/Worksheet_Part2.md>
-
 NeuralNine. "PyTorch Project: Handwritten Digit Recognition." *YouTube*, 22, Aug. 2023, <https://www.youtube.com/watch?v=vBlO87ZAiiw>.
+
+SSTIA. "SSTIA Deep Learning Workshop 2025." Source: <https://github.com/UMJI-SSTIA/Deeplearning-wksp-2025/blob/main/Worksheet/Worksheet_Part2.md>
