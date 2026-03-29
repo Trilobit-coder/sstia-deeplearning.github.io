@@ -1,3 +1,7 @@
+---
+discussions: true
+---
+
 # Prerequisite knowledge
 
 ## Matrix

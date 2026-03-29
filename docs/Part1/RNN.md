@@ -1,3 +1,7 @@
+---
+discussions: true
+---
+
 # Recurrent Neural Network
 
 While FNNs are excellent for mapping fixed-size inputs to fixed-size outputs and CNNs excel at processing spatial data (like images), they both share a limitation: they have no memory of previous inputs. They assume all inputs (and outputs) are independent of each other.

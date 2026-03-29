@@ -1,3 +1,7 @@
+---
+discussions: true
+---
+
 # KNN and Linear Classifier
 
 ## 0\. Foreword
