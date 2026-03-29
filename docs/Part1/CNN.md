@@ -2,7 +2,7 @@
 discussions: true
 ---
 
-# Convolutional Neural Networks
+# Convolutional Neural Network
 
 ## 4\. Why Perceptrons Aren't Enough
 
